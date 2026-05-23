@@ -1,0 +1,1138 @@
+cat > /mnt/user-data/outputs/matrizes.html << 'HTMLEOF'
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matrizes — Estudos Quantitativos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0e0e0e;--paper:#f5f2ec;--paper2:#ede9e0;--paper3:#e4dfd3;
+  --accent:#1a3a2a;--accent2:#2d6246;
+  --border:#c8c0b0;--border2:#a09880;
+  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--serif:'Fraunces',serif;
+}
+html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans)}
+.shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:var(--accent);color:#e8f0ec;padding:40px 28px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
+.main{padding:60px 72px 100px;max-width:900px}
+.sid-logo{font-family:var(--serif);font-size:22px;font-weight:600;color:#fff;line-height:1.3;margin-bottom:6px}
+.sid-sub{font-family:var(--mono);font-size:10px;color:#7aab90;letter-spacing:.12em;text-transform:uppercase;margin-bottom:40px}
+.sid-label{font-family:var(--mono);font-size:9px;color:#5a8a70;letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;margin-top:28px}
+.sid-label:first-of-type{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;font-size:14px;color:#b8d4c4;font-weight:400;transition:.15s;margin-bottom:3px;border:none;background:transparent;width:100%;text-align:left;font-family:var(--sans)}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.on{background:rgba(255,255,255,.12);color:#fff;font-weight:500}
+.nav-num{font-family:var(--mono);font-size:11px;color:#5a8a70;width:20px;flex-shrink:0}
+.nav-item.on .nav-num{color:#7aab90}
+.sid-progress{margin-top:auto;padding-top:32px;border-top:1px solid rgba(255,255,255,.08)}
+.prog-label{font-family:var(--mono);font-size:10px;color:#5a8a70;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.prog-bar{height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#7aab90,#4a8a65);border-radius:2px;transition:.4s}
+.prog-text{font-family:var(--mono);font-size:11px;color:#7aab90;margin-top:6px}
+.pg-eyebrow{font-family:var(--mono);font-size:11px;color:var(--accent2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+.pg-title{font-family:var(--serif);font-size:48px;font-weight:300;color:var(--ink);line-height:1.15;margin-bottom:10px}
+.pg-title em{font-style:italic;color:var(--accent)}
+.pg-sub{font-size:15px;color:#5a5a4a;line-height:1.7;max-width:560px;margin-bottom:8px}
+.pg-formula{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:6px;background:var(--accent);color:#b8d4c4;font-family:var(--mono);font-size:13px;margin-bottom:40px}
+.step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:28px;flex-wrap:wrap}
+.step-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.2s;flex-shrink:0}
+.step-dot.on{background:var(--accent);width:24px;border-radius:4px}
+.step-dot.done{background:var(--accent2);opacity:.5}
+.step-count{font-family:var(--mono);font-size:12px;color:#8a8a7a;margin-left:8px}
+.stage{background:var(--paper2);border:1px solid var(--border);border-radius:16px;padding:48px 40px 40px;min-height:280px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:28px;position:relative;overflow:visible;margin-bottom:28px}
+.stage-label{position:absolute;top:16px;left:20px;font-family:var(--mono);font-size:10px;color:var(--border2);letter-spacing:.1em;text-transform:uppercase}
+.mblock{display:flex;flex-direction:column;align-items:center;gap:10px}
+.mname{font-family:var(--mono);font-size:11px;color:#8a8a7a;letter-spacing:.1em;text-transform:uppercase}
+.bwrap{display:flex;align-items:center}
+.brk{font-size:88px;font-weight:300;line-height:1;color:var(--border);user-select:none;font-family:var(--serif)}
+.mgrid{display:flex;flex-direction:column;gap:6px;position:relative}
+.mrow{display:flex;gap:6px}
+.cell{width:70px;height:70px;border:1.5px solid var(--border);border-radius:10px;background:var(--paper);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:400;font-family:var(--serif);color:var(--ink);position:relative;user-select:none;flex-direction:column;transition:transform .3s cubic-bezier(.34,1.4,.64,1),border .2s,background .2s,opacity .2s}
+.cell .cidx{position:absolute;bottom:4px;right:5px;font-size:9px;color:var(--border2);font-weight:400;font-family:var(--mono)}
+.cell.hi{border:2px solid var(--accent);transform:scale(1.13);z-index:10;background:#e8f0ec;box-shadow:0 4px 20px rgba(26,58,42,.15)}
+.cell.bold{border:2px solid var(--accent2)}
+.cell.diag{border:2px solid var(--accent);background:#e8f0ec;box-shadow:0 4px 16px rgba(26,58,42,.12)}
+.cell.ghost{opacity:.12;border-style:dashed}
+.cell.done{border:2px solid var(--border2);background:var(--paper2);opacity:.7}
+.cell.warm{border:2px solid #b07a30;background:#fdf3e3;box-shadow:0 4px 16px rgba(176,122,48,.12)}
+@keyframes popIn{0%{transform:scale(.3);opacity:0}65%{transform:scale(1.16)}100%{transform:scale(1);opacity:1}}
+@keyframes popHi{0%{transform:scale(.3);opacity:0}65%{transform:scale(1.24)}100%{transform:scale(1.13);opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.pop{animation:popIn .38s cubic-bezier(.34,1.4,.64,1) forwards}
+.poph{animation:popHi .38s cubic-bezier(.34,1.4,.64,1) forwards}
+.fadeup{animation:fadeUp .3s ease forwards}
+.opsym{font-size:30px;font-weight:300;color:var(--border2);display:flex;align-items:center;padding:0 4px;user-select:none;font-family:var(--serif)}
+.fpanel{display:flex;flex-direction:column;gap:8px;min-width:180px;max-width:260px}
+.fline{font-size:16px;font-weight:400;color:var(--ink);font-family:var(--serif)}
+.fline.muted{opacity:.3;font-size:14px}
+.fline.big{font-size:40px;font-weight:300;font-family:var(--serif);color:var(--accent);letter-spacing:-.02em}
+.fline.med{font-size:24px;font-weight:300;font-family:var(--serif);color:var(--accent)}
+.fline.warm{font-size:22px;font-weight:300;font-family:var(--serif);color:#b07a30}
+.fdiv{height:1px;background:var(--border);margin:4px 0}
+.rbadge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;border:1.5px solid var(--accent);font-size:15px;font-weight:500;color:var(--accent);white-space:nowrap;font-family:var(--mono);background:rgba(26,58,42,.04)}
+.syscol{display:flex;flex-direction:column;gap:9px;min-width:240px;max-width:340px;width:100%}
+.sbox{padding:14px 20px;border-radius:10px;border:1.5px solid var(--border);background:var(--paper);font-size:18px;font-weight:300;font-family:var(--serif);color:var(--ink);text-align:center;transition:.2s;white-space:nowrap}
+.sbox small{display:block;font-size:12px;font-weight:400;color:#8a8a7a;margin-top:4px;font-family:var(--mono)}
+.sbox.hi{border:2px solid var(--accent);background:#e8f0ec;color:var(--accent)}
+.sbox.ghost{opacity:.1;border-style:dashed}
+.sbox.done{border:1.5px solid var(--border2);background:var(--paper2);color:#5a5a4a}
+.sbox.result{border:2px solid var(--accent);background:#e8f0ec}
+.sbox.warm{border:2px solid #b07a30;background:#fdf3e3;color:#7a4a10}
+.sdiv{height:1px;background:var(--border);margin:2px 0}
+.calcline{width:100%;text-align:center;font-size:13px;color:#8a8a7a;font-family:var(--mono);margin-top:6px;letter-spacing:.02em}
+.calcline.big{font-size:16px;color:var(--accent);font-weight:500}
+.lu-phases{display:flex;flex-direction:column;gap:9px;width:100%;max-width:420px}
+.lu-phase{padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--paper);font-size:13px;color:#8a8a7a;font-family:var(--mono);display:flex;align-items:center;gap:12px;transition:.2s}
+.lu-phase.active{border:1.5px solid var(--accent);background:#e8f0ec;color:var(--accent)}
+.arr-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:20}
+.arr-path{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-linecap:round;stroke-dasharray:200;stroke-dashoffset:200;transition:stroke-dashoffset .55s ease}
+.arr-path.on{stroke-dashoffset:0}
+.arr-tip{fill:var(--accent);opacity:0;transition:opacity .15s .54s}
+.arr-tip.on{opacity:1}
+.dline{position:absolute;height:1.5px;background:var(--accent);border-radius:2px;transform-origin:left center;pointer-events:none;z-index:15}
+.dline.dash{background:transparent;border-top:1.5px dashed var(--border2)}
+.dline.warm{background:#b07a30}
+.capblock{margin-top:4px}
+.cap-text{font-size:16px;line-height:1.75;color:var(--ink)}
+.cap-text b{font-weight:600;color:var(--accent)}
+.hint-box{margin-top:12px;padding:12px 16px;background:var(--paper3);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;font-size:13px;color:#5a5a4a;line-height:1.65;font-family:var(--sans)}
+.nav-row{display:flex;align-items:center;gap:10px;margin-top:24px;flex-wrap:wrap}
+.nbtn{padding:11px 24px;border-radius:8px;border:1.5px solid var(--border);background:var(--paper);color:var(--ink);font-size:14px;cursor:pointer;font-weight:400;font-family:var(--sans);transition:.12s}
+.nbtn:hover{border-color:var(--border2);background:var(--paper2)}
+.nbtn:disabled{opacity:.2;cursor:not-allowed}
+.nbtn.go{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+.nbtn.go:hover{background:var(--accent2)}
+.nbtn.rst{font-size:13px;padding:10px 14px;color:#8a8a7a}
+.calc-stack{display:flex;flex-direction:column;gap:6px;align-items:center;min-width:200px}
+.calc-row{font-family:var(--mono);font-size:15px;color:var(--ink);padding:8px 16px;border-radius:8px;border:1px solid var(--border);background:var(--paper);text-align:center;width:100%}
+.calc-row.active{border-color:var(--accent);background:#e8f0ec;color:var(--accent);font-weight:500}
+.calc-row.faded{opacity:.25}
+.calc-row.result{border-color:var(--accent);background:var(--accent);color:#fff;font-weight:500}
+.calc-row.warm{border-color:#b07a30;background:#fdf3e3;color:#7a4a10}
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr}
+  .sidebar{position:fixed;bottom:0;top:auto;height:auto;width:100%;flex-direction:row;overflow-x:auto;padding:12px 16px;z-index:100;gap:6px}
+  .sid-logo,.sid-sub,.sid-label,.sid-progress{display:none}
+  .nav-item{padding:8px 12px;white-space:nowrap;margin-bottom:0}
+  .main{padding:32px 24px 120px}
+  .pg-title{font-size:36px}
+  .stage{padding:32px 20px 28px;gap:16px}
+  .cell{width:58px;height:58px;font-size:22px}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="sidebar">
+  <div class="sid-logo">Estudos Quantitativos</div>
+  <div class="sid-sub">UNIFACCAMP · Álgebra Linear</div>
+  <div class="sid-label">Tópicos</div>
+  <button class="nav-item on" onclick="go('transp',this)"><span class="nav-num">01</span>Transposta</button>
+  <button class="nav-item" onclick="go('det',this)"><span class="nav-num">02</span>Determinante</button>
+  <button class="nav-item" onclick="go('mult',this)"><span class="nav-num">03</span>Multiplicação</button>
+  <button class="nav-item" onclick="go('sys',this)"><span class="nav-num">04</span>Sistema Linear</button>
+  <button class="nav-item" onclick="go('lu',this)"><span class="nav-num">05</span>Fatoração LU</button>
+  <button class="nav-item" onclick="go('subst',this)"><span class="nav-num">06</span>Substituição</button>
+  <button class="nav-item" onclick="go('eig',this)"><span class="nav-num">07</span>Autovalores</button>
+  <div class="sid-progress">
+    <div class="prog-label">Progresso</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:14%"></div></div>
+    <div class="prog-text" id="prog-text">1 / 7 tópicos</div>
+  </div>
+</nav>
+<main class="main">
+
+<section id="pg-transp" class="page">
+  <div class="pg-eyebrow">Exercício 5</div>
+  <h1 class="pg-title">Transposta <em>A<sup>T</sup></em></h1>
+  <p class="pg-sub">Trocar linhas por colunas: cada elemento muda de posição mas o valor permanece.</p>
+  <div class="pg-formula">A[i][j] → Aᵀ[j][i]</div>
+  <div class="step-indicator" id="t-dots"></div>
+  <div class="stage" id="st-transp"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="t-prev" onclick="nav('t',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="t-next" onclick="nav('t',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('t')">↺ Reiniciar</button>
+    <span class="step-count" id="t-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="t-cap"></div><div class="hint-box" id="t-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-det" class="page" style="display:none">
+  <div class="pg-eyebrow">Exercício 7</div>
+  <h1 class="pg-title">Determinante <em>2×2</em></h1>
+  <p class="pg-sub">Matriz M = [[5,2],[3,4]]. O determinante mede se a matriz tem inversa.</p>
+  <div class="pg-formula">det = (a×d) − (b×c)</div>
+  <div class="step-indicator" id="d-dots"></div>
+  <div class="stage" id="st-det"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="d-prev" onclick="nav('d',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="d-next" onclick="nav('d',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('d')">↺ Reiniciar</button>
+    <span class="step-count" id="d-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="d-cap"></div><div class="hint-box" id="d-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-mult" class="page" style="display:none">
+  <div class="pg-eyebrow">Exercício 6</div>
+  <h1 class="pg-title">Multiplicação <em>AX</em></h1>
+  <p class="pg-sub">A(2×2) × X(2×1). Cada linha de A gera uma posição do resultado.</p>
+  <div class="pg-formula">(AX)[i] = Σ A[i][k] × X[k]</div>
+  <div class="step-indicator" id="m-dots"></div>
+  <div class="stage" id="st-mult"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="m-prev" onclick="nav('m',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="m-next" onclick="nav('m',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('m')">↺ Reiniciar</button>
+    <span class="step-count" id="m-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="m-cap"></div><div class="hint-box" id="m-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-sys" class="page" style="display:none">
+  <div class="pg-eyebrow">Exercício 11</div>
+  <h1 class="pg-title">Sistema <em>Linear</em></h1>
+  <p class="pg-sub">Método da adição para eliminar uma variável e encontrar a solução.</p>
+  <div class="pg-formula">x + y = 10  |  x − y = 4</div>
+  <div class="step-indicator" id="s-dots"></div>
+  <div class="stage" id="st-sys"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="s-prev" onclick="nav('s',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="s-next" onclick="nav('s',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('s')">↺ Reiniciar</button>
+    <span class="step-count" id="s-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="s-cap"></div><div class="hint-box" id="s-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-lu" class="page" style="display:none">
+  <div class="pg-eyebrow">Do caderno</div>
+  <h1 class="pg-title">Fatoração <em>LU</em></h1>
+  <p class="pg-sub">Decompor A = L × U em duas matrizes triangulares para facilitar sistemas.</p>
+  <div class="pg-formula">A = L · U  →  Ly=b depois Ux=y</div>
+  <div class="step-indicator" id="l-dots"></div>
+  <div class="stage" id="st-lu"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="l-prev" onclick="nav('l',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="l-next" onclick="nav('l',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('l')">↺ Reiniciar</button>
+    <span class="step-count" id="l-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="l-cap"></div><div class="hint-box" id="l-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-subst" class="page" style="display:none">
+  <div class="pg-eyebrow">Do caderno</div>
+  <h1 class="pg-title">Substituição <em>L·y=b / U·x=y</em></h1>
+  <p class="pg-sub">Dois sistemas triangulares resolvidos por substituição progressiva e regressiva.</p>
+  <div class="pg-formula">1: A=LU  2: Ly=b  3: Ux=y</div>
+  <div class="step-indicator" id="sb-dots"></div>
+  <div class="stage" id="st-subst"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="sb-prev" onclick="nav('sb',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="sb-next" onclick="nav('sb',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('sb')">↺ Reiniciar</button>
+    <span class="step-count" id="sb-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="sb-cap"></div><div class="hint-box" id="sb-hint" style="display:none"></div></div>
+</section>
+
+<section id="pg-eig" class="page" style="display:none">
+  <div class="pg-eyebrow">Exercício 19</div>
+  <h1 class="pg-title">Autovalores <em>λ</em></h1>
+  <p class="pg-sub">Matriz triangular B (3×3). Os autovalores estão na diagonal principal.</p>
+  <div class="pg-formula">λ = diagonal principal de B</div>
+  <div class="step-indicator" id="e-dots"></div>
+  <div class="stage" id="st-eig"><span class="stage-label">Visualização</span></div>
+  <div class="nav-row">
+    <button class="nbtn" id="e-prev" onclick="nav('e',-1)" disabled>← Anterior</button>
+    <button class="nbtn go" id="e-next" onclick="nav('e',1)">Próximo →</button>
+    <button class="nbtn rst" onclick="reset('e')">↺ Reiniciar</button>
+    <span class="step-count" id="e-cnt"></span>
+  </div>
+  <div class="capblock"><div class="cap-text" id="e-cap"></div><div class="hint-box" id="e-hint" style="display:none"></div></div>
+</section>
+
+</main>
+</div>
+<script>
+const pageOrder=['transp','det','mult','sys','lu','subst','eig'];
+function go(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  document.getElementById('pg-'+id).style.display='block';
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const idx=pageOrder.indexOf(id);
+  document.getElementById('prog-fill').style.width=((idx+1)/7*100)+'%';
+  document.getElementById('prog-text').textContent=(idx+1)+' / 7 tópicos';
+}
+const steps={},renders={};
+function nav(key,dir){
+  steps[key]=Math.max(0,Math.min((steps[key]||0)+dir,(renders[key].length)-1));
+  renders[key][steps[key]]();updateUI(key);
+}
+function reset(key){steps[key]=0;renders[key][0]();updateUI(key);}
+function updateUI(key){
+  const s=steps[key]||0,tot=renders[key].length;
+  document.getElementById(key+'-cnt').textContent='Passo '+(s+1)+' de '+tot;
+  document.getElementById(key+'-prev').disabled=s<=0;
+  document.getElementById(key+'-next').disabled=s>=tot-1;
+  dotRender(key+'-dots',tot,s);
+}
+function dotRender(id,tot,cur){
+  const c=document.getElementById(id);c.innerHTML='';
+  for(let i=0;i<tot;i++){const d=document.createElement('div');d.className='step-dot'+(i===cur?' on':i<cur?' done':'');c.appendChild(d);}
+}
+function setCap(key,cap,hint){
+  document.getElementById(key+'-cap').innerHTML=cap;
+  const hb=document.getElementById(key+'-hint');
+  if(hint){hb.style.display='block';hb.textContent='💡 '+hint;}
+  else hb.style.display='none';
+}
+function sym(s){const d=document.createElement('div');d.className='opsym';d.textContent=s;return d;}
+function buildCell(val,cls,showIdx,r,c){
+  const el=document.createElement('div');el.className='cell';
+  el.innerHTML='<span>'+val+'</span>';
+  if(showIdx){const ix=document.createElement('span');ix.className='cidx';ix.textContent=(r+1)+(c+1);el.appendChild(ix);}
+  if(cls)cls.split(' ').forEach(s=>s&&el.classList.add(s));
+  return el;
+}
+function buildMat(data,states,name,showIdx,animClass){
+  const wrap=document.createElement('div');wrap.className='mblock';
+  if(name){const n=document.createElement('div');n.className='mname';n.textContent=name;wrap.appendChild(n);}
+  const bw=document.createElement('div');bw.className='bwrap';
+  const lb=document.createElement('span');lb.className='brk';lb.textContent='[';
+  const rb2=document.createElement('span');rb2.className='brk';rb2.textContent=']';
+  const mg=document.createElement('div');mg.className='mgrid';
+  data.forEach((row,i)=>{
+    const mr=document.createElement('div');mr.className='mrow';
+    row.forEach((v,j)=>{
+      const st=(states||{})[i+','+j]||'';
+      const cell=buildCell(v,st,showIdx,i,j);
+      if(animClass)cell.classList.add(animClass);
+      mr.appendChild(cell);
+    });
+    mg.appendChild(mr);
+  });
+  bw.appendChild(lb);bw.appendChild(mg);bw.appendChild(rb2);
+  wrap.appendChild(bw);wrap._grid=mg;return wrap;
+}
+function addArrow(stage,fromEl,toEl){
+  requestAnimationFrame(()=>{
+    const sr=stage.getBoundingClientRect();
+    const fr=fromEl.getBoundingClientRect();
+    const tr=toEl.getBoundingClientRect();
+    const x1=fr.left-sr.left+fr.width/2,y1=fr.top-sr.top+fr.height/2;
+    const x2=tr.left-sr.left+tr.width/2,y2=tr.top-sr.top+tr.height/2;
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg');svg.setAttribute('class','arr-svg');
+    const cx=(x1+x2)/2,cy=Math.min(y1,y2)-36;
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d',`M${x1},${y1} Q${cx},${cy} ${x2},${y2}`);
+    path.setAttribute('class','arr-path');
+    const ang=Math.atan2(y2-cy,x2-cx),hs=8;
+    const tip=document.createElementNS(NS,'polygon');
+    tip.setAttribute('points',`${x2},${y2} ${x2-hs*Math.cos(ang-.4)},${y2-hs*Math.sin(ang-.4)} ${x2-hs*Math.cos(ang+.4)},${y2-hs*Math.sin(ang+.4)}`);
+    tip.setAttribute('class','arr-tip');
+    svg.appendChild(path);svg.appendChild(tip);stage.appendChild(svg);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{path.classList.add('on');tip.classList.add('on');}));
+  });
+}
+function addDiag(grid,c1,c2,dashed,warm){
+  requestAnimationFrame(()=>{
+    const gr=grid.getBoundingClientRect();
+    const r1=c1.getBoundingClientRect(),r2=c2.getBoundingClientRect();
+    const x1=r1.left-gr.left+r1.width/2,y1=r1.top-gr.top+r1.height/2;
+    const x2=r2.left-gr.left+r2.width/2,y2=r2.top-gr.top+r2.height/2;
+    const len=Math.hypot(x2-x1,y2-y1),ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+    const l=document.createElement('div');
+    l.className='dline'+(dashed?' dash':'')+(warm?' warm':'');
+    l.style.cssText=`top:${y1}px;left:${x1}px;width:${len}px;transform:rotate(${ang}deg)`;
+    grid.appendChild(l);
+  });
+}
+function calcStack(rows){
+  const wrap=document.createElement('div');wrap.className='calc-stack';
+  rows.forEach(r=>{
+    const d=document.createElement('div');
+    d.className='calc-row '+(r.cls||'');
+    d.textContent=r.t;
+    wrap.appendChild(d);
+  });
+  return wrap;
+}
+function clearStage(id){
+  const st=document.getElementById(id);
+  const lbl=st.querySelector('.stage-label');
+  st.innerHTML='';if(lbl)st.appendChild(lbl);return st;
+}
+
+/* ============================================================
+   01 — TRANSPOSTA  (9 passos)
+============================================================ */
+const tA=[[1,5],[2,8]],tAT=[[1,2],[5,8]];
+steps['t']=0;
+const G=(s)=>({'0,0':'ghost','0,1':'ghost','1,0':'ghost','1,1':'ghost',...s});
+renders['t']=[
+  // 1 — apresentação
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{},'A',true);
+    const wAT=buildMat(tAT,G({}),'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    setCap('t','Esta é a matriz <b>A</b> (2×2). Os índices no canto de cada célula mostram sua posição [linha][coluna]. A transposta Aᵀ ainda está oculta.','A ideia é simples: o elemento que estava em [i,j] vai para [j,i] — as coordenadas se invertem.');
+  },
+  // 2 — regra geral
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{},'A',true);
+    const wAT=buildMat(tAT,G({}),'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'A[i][j]  →  Aᵀ[j][i]',cls:'active'},
+      {t:'linha vira coluna',cls:''},
+      {t:'coluna vira linha',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('t','Regra geral: o elemento na posição <b>[linha i, coluna j]</b> de A vai para <b>[linha j, coluna i]</b> em Aᵀ. As coordenadas simplesmente trocam de lugar.','Lembre: o valor não muda, só o endereço do elemento muda.');
+  },
+  // 3 — diagonal principal não muda
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{'0,0':'diag','1,1':'diag'},'A',true);
+    const wAT=buildMat(tAT,{'0,0':'diag','1,1':'diag','0,1':'ghost','1,0':'ghost'},'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'a₁₁ = 1  →  Aᵀ[1][1] = 1 ✓',cls:'active'},
+      {t:'a₂₂ = 8  →  Aᵀ[2][2] = 8 ✓',cls:'active'},
+      {t:'[i,i] → [i,i]  (não muda!)',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('t','A <b>diagonal principal</b> (a₁₁ = 1 e a₂₂ = 8) não se move. Quando linha = coluna, inverter as coordenadas não muda nada: [i,i] → [i,i].','Dois elementos já estão no lugar certo. Só os dois fora da diagonal precisam trocar.');
+  },
+  // 4 — identificar a12
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{'0,1':'hi','0,0':'done','1,1':'done'},'A',true);
+    const wAT=buildMat(tAT,G({'0,0':'done','1,1':'done'}),'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'a₁₂ = 5',cls:'active'},
+      {t:'posição atual: [1, 2]',cls:''},
+      {t:'nova posição:  [2, 1]',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('t','Vamos mover o <b>5</b>. Ele está em [linha 1, coluna 2] de A. Pela regra, vai para [linha 2, coluna 1] em Aᵀ.','Basta trocar os índices: [1,2] → [2,1]. Simples assim.');
+  },
+  // 5 — mover a12
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{'0,1':'hi','0,0':'done','1,1':'done'},'A',true);
+    const wAT=buildMat(tAT,{'0,0':'done','0,1':'ghost','1,0':'poph','1,1':'done'},'Aᵀ',true);
+    const all=[...st.querySelectorAll('.cell')];
+    // We'll do arrow after append
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const allCells=[...st.querySelectorAll('.cell')];
+    addArrow(st,allCells[1],allCells[6]);
+    setCap('t','O <b>5</b> chegou em Aᵀ[2,1]! A seta mostra o caminho: de [linha 1, col 2] para [linha 2, col 1].','Visualmente: como se o 5 "descesse" da primeira linha para a segunda coluna.');
+  },
+  // 6 — identificar a21
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{'1,0':'hi','0,0':'done','1,1':'done','0,1':'done'},'A',true);
+    const wAT=buildMat(tAT,{'0,0':'done','1,0':'done','1,1':'done','0,1':'ghost'},'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'a₂₁ = 2',cls:'active'},
+      {t:'posição atual: [2, 1]',cls:''},
+      {t:'nova posição:  [1, 2]',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('t','Agora o <b>2</b>. Ele está em [linha 2, coluna 1] de A. Vai para [linha 1, coluna 2] em Aᵀ.','Note: o 2 e o 5 trocam de lugar entre si. Eles são "espelhados".');
+  },
+  // 7 — mover a21
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{'1,0':'hi','0,0':'done','1,1':'done','0,1':'done'},'A',true);
+    const wAT=buildMat(tAT,{'0,0':'done','1,0':'done','1,1':'done','0,1':'poph'},'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const allCells=[...st.querySelectorAll('.cell')];
+    addArrow(st,allCells[2],allCells[5]);
+    setCap('t','O <b>2</b> chegou em Aᵀ[1,2]! Os dois elementos fora da diagonal trocaram de lugar entre si.','Resultado parcial: diagonal no lugar + 5 e 2 trocados. Só falta montar a visão completa.');
+  },
+  // 8 — linha→coluna
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{},'A',true);
+    const wAT=buildMat(tAT,{},'Aᵀ',true,'pop');
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'Linha 1 de A: [1, 5]',cls:''},
+      {t:'→ Coluna 1 de Aᵀ: [1, 5]',cls:'active'},
+      {t:'Linha 2 de A: [2, 8]',cls:''},
+      {t:'→ Coluna 2 de Aᵀ: [2, 8]',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('t','Aᵀ completa! Cada <b>linha</b> de A virou uma <b>coluna</b> de Aᵀ. A linha 1 [1,5] virou a coluna 1. A linha 2 [2,8] virou a coluna 2.','Leia Aᵀ de cima pra baixo: coluna 1 = [1,2], coluna 2 = [5,8]. São as linhas originais de A.');
+  },
+  // 9 — resumo final
+  ()=>{
+    const st=clearStage('st-transp');
+    const wA=buildMat(tA,{},'A',true);
+    const wAT=buildMat(tAT,{},'Aᵀ',true);
+    st.appendChild(wA);st.appendChild(sym('→'));st.appendChild(wAT);
+    const cs=calcStack([
+      {t:'A  (2×2)  →  Aᵀ  (2×2)',cls:''},
+      {t:'(Aᵀ)ᵀ = A sempre',cls:''},
+      {t:'det(Aᵀ) = det(A)',cls:''},
+      {t:'Se A simétrica: Aᵀ = A',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('t','Propriedades importantes: transposta da transposta devolve A; o determinante não muda; se todos os elementos fora da diagonal fossem iguais, A seria simétrica (Aᵀ = A).','Verificação rápida: Aᵀ[1][2] = A[2][1] = 2 ✓  e  Aᵀ[2][1] = A[1][2] = 5 ✓');
+  },
+];
+renders['t'][0]();updateUI('t');
+
+/* ============================================================
+   02 — DETERMINANTE  (8 passos)
+============================================================ */
+const dM=[[5,2],[3,4]];
+steps['d']=0;
+renders['d']=[
+  // 1 — apresentação
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{},'M',true);
+    st.appendChild(wD);
+    const cs=calcStack([
+      {t:'det(M) = ?',cls:'active'},
+      {t:'M tem inversa?',cls:''},
+      {t:'Sistema tem solução única?',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('d','Matriz M = [[5,2],[3,4]]. O determinante responde: <b>esta matriz tem inversa?</b> Se det ≠ 0, sim. Se det = 0, não.','Para uma 2×2, a fórmula é: det = (a×d) − (b×c). Vamos calcular passo a passo.');
+  },
+  // 2 — nomear elementos
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{'0,0':'hi','0,1':'warm','1,0':'warm','1,1':'hi'},'M',true);
+    st.appendChild(wD);
+    const cs=calcStack([
+      {t:'a = M[1,1] = 5',cls:'active'},
+      {t:'b = M[1,2] = 2',cls:'warm'},
+      {t:'c = M[2,1] = 3',cls:'warm'},
+      {t:'d = M[2,2] = 4',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','Nomeamos os quatro elementos: <b>a=5</b> e <b>d=4</b> estão na diagonal principal (verde). <b>b=2</b> e <b>c=3</b> estão na diagonal secundária (amarelo).','a e d formam um par, b e c formam outro par. Cada par gera um produto.');
+  },
+  // 3 — diagonal principal
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{'0,0':'diag','1,1':'diag'},'M',true);
+    st.appendChild(wD);
+    const grid=wD._grid;
+    const cells=[...grid.querySelectorAll('.cell')];
+    addDiag(grid,cells[0],cells[3],false,false);
+    const cs=calcStack([
+      {t:'Diagonal ↘  (principal)',cls:''},
+      {t:'a × d',cls:''},
+      {t:'5 × 4',cls:'active'},
+      {t:'= 20',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','<b>Diagonal principal ↘</b>: do canto superior esquerdo ao inferior direito. Multiplicamos a = 5 por d = 4.','5 × 4 = 20. Este produto vai ser somado ao resultado final.');
+  },
+  // 4 — diagonal secundária
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{'0,1':'warm','1,0':'warm'},'M',true);
+    st.appendChild(wD);
+    const grid=wD._grid;
+    const cells=[...grid.querySelectorAll('.cell')];
+    addDiag(grid,cells[1],cells[2],true,true);
+    const cs=calcStack([
+      {t:'Diagonal ↗  (secundária)',cls:''},
+      {t:'b × c',cls:''},
+      {t:'2 × 3',cls:'warm'},
+      {t:'= 6',cls:'warm'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','<b>Diagonal secundária ↗</b>: do canto superior direito ao inferior esquerdo. Multiplicamos b = 2 por c = 3.','2 × 3 = 6. Este produto vai ser <u>subtraído</u> do primeiro.');
+  },
+  // 5 — subtração
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{'0,0':'diag','1,1':'diag','0,1':'warm','1,0':'warm'},'M',true);
+    const grid=wD._grid;
+    const cells=[...grid.querySelectorAll('.cell')];
+    addDiag(grid,cells[0],cells[3],false,false);
+    addDiag(grid,cells[1],cells[2],true,true);
+    st.appendChild(wD);
+    const cs=calcStack([
+      {t:'(a×d)  −  (b×c)',cls:''},
+      {t:'  20   −    6',cls:'active'},
+      {t:'= 14',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','Subtraímos o produto da diagonal secundária do produto da diagonal principal: 20 − 6 = <b>14</b>.','Sempre: det = (produto ↘) MENOS (produto ↗). A ordem importa!');
+  },
+  // 6 — resultado e interpretação
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{},'M',true);
+    st.appendChild(wD);
+    const cs=calcStack([
+      {t:'det(M) = 14',cls:'result'},
+      {t:'14 ≠ 0  →  tem inversa ✓',cls:'active'},
+      {t:'Sistema tem solução única ✓',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','det(M) = <b>14</b>. Como é diferente de zero, a matriz M tem inversa e qualquer sistema Mx=b tem solução única (SPD).','det = 0 significaria que a matriz é singular: sem inversa, e o sistema poderia ter infinitas soluções ou nenhuma.');
+  },
+  // 7 — verificação cruzada
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{},'M',true);
+    st.appendChild(wD);
+    const cs=calcStack([
+      {t:'Checklist:',cls:''},
+      {t:'a×d = 5×4 = 20 ✓',cls:''},
+      {t:'b×c = 2×3 = 6  ✓',cls:''},
+      {t:'20 − 6 = 14    ✓',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('d','Revisão completa: identificamos a, b, c, d → calculamos os dois produtos → subtraímos. Cada etapa verificada.','Dica: para matrizes 3×3 existe a Regra de Sarrus, que expande essa ideia para 3 diagonais positivas e 3 negativas.');
+  },
+  // 8 — resumo
+  ()=>{
+    const st=clearStage('st-det');
+    const wD=buildMat(dM,{'0,0':'diag','1,1':'diag','0,1':'warm','1,0':'warm'},'M',true);
+    const grid=wD._grid;
+    const cells=[...grid.querySelectorAll('.cell')];
+    addDiag(grid,cells[0],cells[3],false,false);
+    addDiag(grid,cells[1],cells[2],true,true);
+    st.appendChild(wD);
+    const fp=document.createElement('div');fp.className='fpanel';
+    const rb=document.createElement('div');rb.className='rbadge pop';rb.textContent='det(M) = 14';fp.appendChild(rb);
+    st.appendChild(fp);
+    setCap('d','<b>Resumo:</b> diagonal principal (↘) gera +20, diagonal secundária (↗) gera −6. det = 20 − 6 = 14 ≠ 0. M tem inversa!','Para memorizar a fórmula: pense em "principal positivo, secundário negativo".');
+  },
+];
+renders['d'][0]();updateUI('d');
+
+/* ============================================================
+   03 — MULTIPLICAÇÃO  (10 passos)
+============================================================ */
+const mAd=[[2,1],[0,3]],mXd=[[4],[2]],mRd=[[10],[6]];
+steps['m']=0;
+renders['m']=[
+  // 1 — apresentação
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{'0,0':'ghost','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    setCap('m','A (2×2) × X (2×1). O resultado AX terá dimensão 2×1 (mesmo número de linhas de A). Vamos calcular cada posição do resultado separadamente.','Regra dimensional: A(m×n) × X(n×p) → resultado(m×p). Aqui: 2×2 × 2×1 → 2×1.');
+  },
+  // 2 — regra do produto interno
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{'0,0':'ghost','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'AX[1] = linha 1 de A · X',cls:'active'},
+      {t:'AX[2] = linha 2 de A · X',cls:''},
+      {t:'cada posição = produto interno',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Cada posição do resultado vem de um <b>produto interno</b>: multiplicamos elemento a elemento a linha de A pelo vetor X, depois somamos tudo.','Produto interno de [a,b] com [x,y] = a×x + b×y. É a operação central da multiplicação de matrizes.');
+  },
+  // 3 — destacar linha 1 de A
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'0,0':'hi','0,1':'hi'},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{'0,0':'ghost','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'Linha 1 de A = [2, 1]',cls:'active'},
+      {t:'X = [4, 2]',cls:''},
+      {t:'→ vai gerar AX[1]',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Começamos pela <b>linha 1 de A = [2, 1]</b>. Ela vai se "combinar" com o vetor X = [4, 2] para produzir a primeira posição do resultado.','A linha tem 2 elementos, X tem 2 elementos. Multiplicamos par a par e somamos.');
+  },
+  // 4 — primeiro produto da linha 1
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'0,0':'hi','0,1':'done'},'A');const wX=buildMat(mXd,{'0,0':'hi','1,0':'ghost'},'X');const wR=buildMat(mRd,{'0,0':'ghost','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'1º par:  A[1,1] × X[1]',cls:''},
+      {t:'         2  ×  4',cls:'active'},
+      {t:'         = 8',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Primeiro par: A[1,1] = <b>2</b> multiplicado por X[1] = <b>4</b>. Resultado parcial: 2 × 4 = <b>8</b>.','Guardamos o 8. Ainda falta o segundo par desta linha.');
+  },
+  // 5 — segundo produto da linha 1
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'0,0':'done','0,1':'hi'},'A');const wX=buildMat(mXd,{'0,0':'ghost','1,0':'hi'},'X');const wR=buildMat(mRd,{'0,0':'ghost','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'2º par:  A[1,2] × X[2]',cls:''},
+      {t:'         1  ×  2',cls:'active'},
+      {t:'         = 2',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Segundo par: A[1,2] = <b>1</b> multiplicado por X[2] = <b>2</b>. Resultado parcial: 1 × 2 = <b>2</b>.','Temos os dois produtos: 8 e 2. Agora é só somar!');
+  },
+  // 6 — somar e colocar na posição 1
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'0,0':'bold','0,1':'bold'},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{'0,0':'done','1,0':'ghost'},'AX');
+    wR.querySelectorAll('.cell')[0].classList.add('pop');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'8  +  2  =  10',cls:'active'},
+      {t:'AX[1] = 10  ✓',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Somamos os dois produtos: 8 + 2 = <b>10</b>. O <b>10</b> vai para a posição 1 do resultado AX.','A linha 1 de A gerou a posição 1 de AX. Agora repetimos o processo com a linha 2.');
+  },
+  // 7 — destacar linha 2 de A
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'1,0':'hi','1,1':'hi','0,0':'done','0,1':'done'},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{'0,0':'done','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'Linha 2 de A = [0, 3]',cls:'active'},
+      {t:'X = [4, 2]',cls:''},
+      {t:'→ vai gerar AX[2]',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Agora a <b>linha 2 de A = [0, 3]</b>. Ela vai gerar a segunda posição do resultado. Atenção ao zero!','Quando um elemento é zero, seu produto com qualquer valor é zero. Ele "apaga" aquele par.');
+  },
+  // 8 — primeiro produto da linha 2
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'1,0':'hi','1,1':'ghost','0,0':'done','0,1':'done'},'A');const wX=buildMat(mXd,{'0,0':'hi','1,0':'ghost'},'X');const wR=buildMat(mRd,{'0,0':'done','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'1º par:  A[2,1] × X[1]',cls:''},
+      {t:'         0  ×  4',cls:'warm'},
+      {t:'         = 0  (zero!)',cls:'warm'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Primeiro par da linha 2: A[2,1] = <b>0</b> multiplicado por X[1] = 4. Qualquer número vezes zero é zero. Este par não contribui nada.','O zero "elimina" o 4 do X. Por isso matrizes esparsas (com muitos zeros) são eficientes de calcular.');
+  },
+  // 9 — segundo produto da linha 2
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{'1,0':'ghost','1,1':'hi','0,0':'done','0,1':'done'},'A');const wX=buildMat(mXd,{'0,0':'ghost','1,0':'hi'},'X');const wR=buildMat(mRd,{'0,0':'done','1,0':'ghost'},'AX');
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'2º par:  A[2,2] × X[2]',cls:''},
+      {t:'         3  ×  2',cls:'active'},
+      {t:'         = 6',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Segundo par da linha 2: A[2,2] = <b>3</b> multiplicado por X[2] = <b>2</b>. Resultado: 3 × 2 = <b>6</b>.','Somamos os dois produtos: 0 + 6 = 6. O 3 carregou sozinho todo o peso desta linha!');
+  },
+  // 10 — resultado final
+  ()=>{
+    const st=clearStage('st-mult');
+    const wA=buildMat(mAd,{},'A');const wX=buildMat(mXd,{},'X');const wR=buildMat(mRd,{},'AX');
+    wR.querySelectorAll('.cell').forEach(c=>c.classList.add('pop'));
+    st.appendChild(wA);st.appendChild(sym('×'));st.appendChild(wX);st.appendChild(sym('='));st.appendChild(wR);
+    const cs=calcStack([
+      {t:'Linha 1: (2×4)+(1×2) = 10 ✓',cls:''},
+      {t:'Linha 2: (0×4)+(3×2) = 6  ✓',cls:''},
+      {t:'AX = [10, 6]',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('m','Resultado final: AX = <b>[10, 6]</b>. Cada posição veio de uma linha de A combinada com todo o vetor X.','Linha 1 → posição 1 do resultado. Linha 2 → posição 2 do resultado. Sempre essa correspondência.');
+  },
+];
+renders['m'][0]();updateUI('m');
+
+/* ============================================================
+   04 — SISTEMA LINEAR  (9 passos)
+============================================================ */
+steps['s']=0;
+const mkBox=(t,s,c)=>({t,s:s||'',c:c||''});
+const sysD=[
+  {
+    boxes:[mkBox('x + y = 10','equação 1'),mkBox('x − y = 4','equação 2')],
+    extra:null,res:null,
+    cap:'Duas equações com duas incógnitas (x e y). Existem 3 métodos: substituição, adição e Cramer. Usaremos o <b>método da adição</b>.',
+    hint:'Método da adição: somamos as equações para eliminar uma variável. Funciona quando os coeficientes de uma variável se cancelam.'
+  },
+  {
+    boxes:[mkBox('x + y = 10','coeficiente de y = +1',''),mkBox('x − y = 4','coeficiente de y = −1','')],
+    extra:null,res:null,
+    cap:'Observamos os coeficientes de <b>y</b>: na equação 1 é <b>+1</b>, na equação 2 é <b>−1</b>. Sinais opostos!',
+    hint:'Quando dois coeficientes são opostos (soma = 0), podemos somá-los e a variável desaparece automaticamente.'
+  },
+  {
+    boxes:[mkBox('x + y = 10','','hi'),mkBox('x − y = 4','','hi')],
+    extra:mkBox('+y e −y se cancelam!','soma: y + (−y) = 0','ghost'),
+    res:null,
+    cap:'Vamos somar as duas equações lado a lado. O plano: <b>+y</b> com <b>−y</b> vai virar zero. A variável y desaparece!',
+    hint:'Somamos os lados esquerdos entre si e os lados direitos entre si. Equações verdadeiras somadas geram outra equação verdadeira.'
+  },
+  {
+    boxes:[mkBox('(x + y)','equação 1 — lado esquerdo','ghost'),mkBox('+ (x − y)','equação 2 — lado esquerdo','ghost')],
+    extra:mkBox('= 2x + 0','os y se cancelam → 2x','hi pop'),
+    res:null,
+    cap:'Lado esquerdo: (x+y) + (x−y) = x+x + y−y = <b>2x + 0 = 2x</b>. O y sumiu!',
+    hint:'x+x = 2x  |  y+(−y) = 0. O zero faz o y desaparecer completamente da equação.'
+  },
+  {
+    boxes:[mkBox('Lado direito:','',''),mkBox('10 + 4','soma dos termos independentes','hi')],
+    extra:mkBox('= 14','lado direito da equação somada','result pop'),
+    res:null,
+    cap:'Lado direito: 10 + 4 = <b>14</b>. Juntando com o lado esquerdo: <b>2x = 14</b>.',
+    hint:'Sempre somar os dois lados separadamente: (esq₁ + esq₂) = (dir₁ + dir₂).'
+  },
+  {
+    boxes:[mkBox('2x = 14','equação resultante',''),mkBox('x = 14 ÷ 2','dividir ambos os lados por 2','')],
+    extra:mkBox('x = 7','primeira incógnita encontrada ✓','hi pop'),
+    res:null,
+    cap:'Isolamos x: dividimos os dois lados por 2. 14 ÷ 2 = <b>7</b>. Portanto <b>x = 7</b>.',
+    hint:'Sempre faça a mesma operação nos dois lados da equação para manter o equilíbrio.'
+  },
+  {
+    boxes:[mkBox('Sabemos: x = 7','substituir na equação 1','done'),mkBox('7 + y = 10','equação 1 com x=7','hi')],
+    extra:mkBox('y = 10 − 7 = 3','isolando y','result pop'),
+    res:null,
+    cap:'Substituímos x = 7 na equação 1: 7 + y = 10. Isolamos y: y = 10 − 7 = <b>3</b>.',
+    hint:'Sempre substitua na equação original mais simples. Aqui a equação 1 é mais direta.'
+  },
+  {
+    boxes:[mkBox('Verificação equação 1:','x + y = 10',''),mkBox('7 + 3 = 10  ✓','','done')],
+    extra:mkBox('Verificação equação 2: x−y = 7−3 = 4  ✓','','done'),
+    res:null,
+    cap:'<b>Verificação:</b> 7 + 3 = 10 ✓ (equação 1) e 7 − 3 = 4 ✓ (equação 2). Ambas satisfeitas!',
+    hint:'Sempre verifique substituindo em TODAS as equações originais. Se falhar em qualquer uma, há erro no cálculo.'
+  },
+  {
+    boxes:[mkBox('x = 7','7 + 3 = 10  ✓  |  7 − 3 = 4  ✓','done'),mkBox('y = 3','ambas equações satisfeitas','done')],
+    extra:null,
+    res:'V = {(7, 3)} — SPD',
+    cap:'<b>V = {(7, 3)}</b>. Sistema Possível e Determinado (SPD): solução única. Geometricamente, as duas retas se cruzam exatamente em (7, 3).',
+    hint:'SPD = 1 solução. SPI = infinitas (retas paralelas e iguais). SI = nenhuma (retas paralelas distintas).'
+  },
+];
+renders['s']=sysD.map(s=>()=>{
+  const st=clearStage('st-sys');const col=document.createElement('div');col.className='syscol';
+  s.boxes.forEach(b=>{const box=document.createElement('div');box.className='sbox '+(b.c||'');box.innerHTML=b.t+(b.s?'<small>'+b.s+'</small>':'');col.appendChild(box);});
+  if(s.extra){const dv=document.createElement('div');dv.className='sdiv';col.appendChild(dv);const res=document.createElement('div');res.className='sbox '+(s.extra.c||'');res.innerHTML=s.extra.t+(s.extra.s?'<small>'+s.extra.s+'</small>':'');col.appendChild(res);}
+  st.appendChild(col);
+  if(s.res){const rb=document.createElement('div');rb.className='rbadge pop';rb.style.marginTop='8px';rb.textContent=s.res;st.appendChild(rb);}
+  setCap('s',s.cap,s.hint);
+});
+renders['s'][0]();updateUI('s');
+
+/* ============================================================
+   05 — FATORAÇÃO LU  (7 passos)
+============================================================ */
+const luA=[[2,1,1],[4,3,3],[8,7,9]];
+const luL=[[1,0,0],[2,1,0],[4,3,1]];
+const luU=[[2,1,1],[0,1,1],[0,0,2]];
+steps['l']=0;
+renders['l']=[
+  // 1 — introdução
+  ()=>{
+    const st=clearStage('st-lu');
+    const wA=buildMat(luA,{},'A');st.appendChild(wA);
+    const ph=document.createElement('div');ph.className='lu-phases';
+    [{n:'1',t:'Eliminação de Gauss em A',desc:'gera os multiplicadores (→ L) e a forma escalonada (→ U)',a:true},
+     {n:'2',t:'L · y = b',desc:'substituição progressiva: linha 1, 2, … n',a:false},
+     {n:'3',t:'U · x = y',desc:'substituição regressiva: linha n, … 2, 1',a:false}
+    ].forEach(p=>{
+      const d=document.createElement('div');d.className='lu-phase'+(p.a?' active':'');
+      d.innerHTML='<div class="ph-num">'+p.n+'</div><div><div style="font-size:14px;font-weight:500;font-family:var(--mono)">'+p.t+'</div><div style="font-size:12px;opacity:.6;margin-top:3px">'+p.desc+'</div></div>';
+      ph.appendChild(d);
+    });
+    st.appendChild(ph);
+    setCap('l','A = [[2,1,1],[4,3,3],[8,7,9]]. Fatoração LU: decompomos A em duas matrizes triangulares usando a <b>eliminação de Gauss</b>.','Vantagem: uma vez feita a decomposição, podemos resolver Ax=b para qualquer b sem refazer o trabalho pesado.');
+  },
+  // 2 — primeiro passo eliminação (linha 2)
+  ()=>{
+    const st=clearStage('st-lu');
+    const wA=buildMat([[2,1,1],[4,3,3],[8,7,9]],{'0,0':'diag','1,0':'hi'},'A');
+    st.appendChild(wA);
+    const cs=calcStack([
+      {t:'Pivô = A[1,1] = 2',cls:'active'},
+      {t:'Multiplicador m₂₁:',cls:''},
+      {t:'m₂₁ = A[2,1] / pivô',cls:''},
+      {t:'     = 4 / 2 = 2',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('l','Pivô é A[1,1] = 2. Para zerar A[2,1] = 4, calculamos o <b>multiplicador m₂₁ = 4 ÷ 2 = 2</b>. Ele vai para a matriz L.','Este multiplicador nos diz: quanto da linha 1 devemos subtrair da linha 2 para criar um zero?');
+  },
+  // 3 — segundo multiplicador (linha 3)
+  ()=>{
+    const st=clearStage('st-lu');
+    const wA=buildMat([[2,1,1],[4,3,3],[8,7,9]],{'0,0':'diag','2,0':'hi'},'A');
+    st.appendChild(wA);
+    const cs=calcStack([
+      {t:'Pivô = A[1,1] = 2',cls:'active'},
+      {t:'Multiplicador m₃₁:',cls:''},
+      {t:'m₃₁ = A[3,1] / pivô',cls:''},
+      {t:'     = 8 / 2 = 4',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('l','Para zerar A[3,1] = 8, calculamos <b>m₃₁ = 8 ÷ 2 = 4</b>. Outro multiplicador guardado em L.','m₃₁ = 4 significa: subtrair 4 × linha 1 da linha 3 vai criar o zero que precisamos.');
+  },
+  // 4 — terceiro multiplicador e segundo pivô
+  ()=>{
+    const st=clearStage('st-lu');
+    const Amid=[[2,1,1],[0,1,1],[0,3,5]];
+    const wA=buildMat(Amid,{'1,1':'diag','2,1':'hi'},'A\'');
+    st.appendChild(wA);
+    const cs=calcStack([
+      {t:'Após zerar coluna 1:',cls:'faded'},
+      {t:'Novo pivô = A\'[2,2] = 1',cls:'active'},
+      {t:'m₃₂ = A\'[3,2] / pivô',cls:''},
+      {t:'     = 3 / 1 = 3',cls:'result'},
+    ]);
+    st.appendChild(cs);
+    setCap('l','Após a primeira eliminação, passamos para o pivô A\'[2,2] = 1. Calculamos <b>m₃₂ = 3 ÷ 1 = 3</b>.','Cada vez que avançamos de coluna, usamos o novo pivô da diagonal.');
+  },
+  // 5 — mostrar L
+  ()=>{
+    const st=clearStage('st-lu');
+    const lSt={'0,1':'ghost','0,2':'ghost','1,2':'ghost'};
+    const wL=buildMat(luL,lSt,'L');st.appendChild(wL);
+    const cs=calcStack([
+      {t:'L[2,1] = m₂₁ = 2',cls:''},
+      {t:'L[3,1] = m₃₁ = 4',cls:''},
+      {t:'L[3,2] = m₃₂ = 3',cls:''},
+      {t:'diagonal = sempre 1',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('l','Matriz <b>L</b>: diagonal = 1, abaixo da diagonal = multiplicadores coletados (2, 4, 3), acima = zeros.','L guarda a "memória" de cada operação de eliminação que fizemos. Isso permite refazer a fatoração eficientemente.');
+  },
+  // 6 — mostrar U
+  ()=>{
+    const st=clearStage('st-lu');
+    const uSt={'1,0':'ghost','2,0':'ghost','2,1':'ghost'};
+    const wU=buildMat(luU,uSt,'U');st.appendChild(wU);
+    const cs=calcStack([
+      {t:'U = A após eliminação',cls:'active'},
+      {t:'zeros abaixo da diagonal',cls:''},
+      {t:'resultado da eliminação',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('l','Matriz <b>U</b>: é a forma escalonada de A após aplicar todos os multiplicadores. Zeros abaixo da diagonal.','U = [[2,1,1],[0,1,1],[0,0,2]]. Verificar: L × U deve dar A original.');
+  },
+  // 7 — L × U = A
+  ()=>{
+    const st=clearStage('st-lu');
+    const lSt={'0,1':'ghost','0,2':'ghost','1,2':'ghost'};
+    const uSt={'1,0':'ghost','2,0':'ghost','2,1':'ghost'};
+    const wL=buildMat(luL,lSt,'L');const wU=buildMat(luU,uSt,'U');
+    st.appendChild(wL);st.appendChild(sym('×'));st.appendChild(wU);
+    const fp=document.createElement('div');fp.className='fpanel';
+    const rb=document.createElement('div');rb.className='rbadge pop';rb.textContent='A = L × U ✓';fp.appendChild(rb);
+    const f=document.createElement('div');f.className='fline muted';f.style.marginTop='10px';f.textContent='Próximo: resolver Ly=b';fp.appendChild(f);
+    st.appendChild(fp);
+    setCap('l','A = L × U verificado! Com L e U em mãos, resolver <b>Ax = b</b> vira: (1) Ly = b por substituição direta, depois (2) Ux = y por substituição reversa.','Se tivermos 10 sistemas diferentes com a mesma A e b diferentes, a decomposição LU é feita só uma vez!');
+  },
+];
+renders['l'][0]();updateUI('l');
+
+/* ============================================================
+   06 — SUBSTITUIÇÃO  (10 passos)
+============================================================ */
+steps['sb']=0;
+const sbData=[
+  {
+    boxes:[mkBox('Sistema: A·x = b','b = [5, 11, 25]',''),mkBox('Passo 1: decompor A = L·U','já feito na seção anterior','done'),mkBox('Passo 2: resolver L·y = b','substituição progressiva ↓',''),mkBox('Passo 3: resolver U·x = y','substituição regressiva ↑','')],
+    extra:null,res:null,
+    cap:'Resolver <b>Ax = b</b> com b = [5, 11, 25] usando a decomposição A = L × U. São dois sistemas triangulares, cada um simples de resolver.',
+    hint:'Triangular = cada linha tem uma incógnita a mais que a anterior. Por isso conseguimos resolver uma incógnita por vez.'
+  },
+  {
+    boxes:[mkBox('Fase 2: L · y = b','sistema triangular inferior','hi'),mkBox('Linha 1:  1·y₁ = 5','apenas y₁ — resolver direto!','')],
+    extra:mkBox('y₁ = 5','encontrado sem cálculo!','result pop'),
+    res:null,
+    cap:'Começamos a substituição <b>progressiva</b> (de cima para baixo). Linha 1 de L tem só y₁: 1·y₁ = 5 → <b>y₁ = 5</b>.',
+    hint:'Triangular inferior: linha 1 tem 1 incógnita, linha 2 tem 2, etc. Por isso começamos de cima.'
+  },
+  {
+    boxes:[mkBox('Linha 2:  2·y₁ + 1·y₂ = 11','substituir y₁ = 5',''),mkBox('2·(5) + y₂ = 11','10 + y₂ = 11','hi'),mkBox('y₂ = 11 − 10','isolar y₂','')],
+    extra:mkBox('y₂ = 1','encontrado ✓','result pop'),
+    res:null,
+    cap:'Linha 2: 2y₁ + y₂ = 11. Substituímos y₁ = 5: 2×5 + y₂ = 11 → 10 + y₂ = 11 → <b>y₂ = 1</b>.',
+    hint:'2×5 = 10. Então: y₂ = 11 − 10 = 1. Sempre isole a incógnita desconhecida movendo os termos conhecidos para o outro lado.'
+  },
+  {
+    boxes:[mkBox('Linha 3:  4·y₁ + 3·y₂ + 1·y₃ = 25','substituir y₁=5 e y₂=1',''),mkBox('4·5 + 3·1 + y₃ = 25','20 + 3 + y₃ = 25','hi'),mkBox('y₃ = 25 − 23','','')],
+    extra:mkBox('y₃ = 2','fase 2 concluída! y = [5,1,2]','result pop'),
+    res:null,
+    cap:'Linha 3: 4×5 + 3×1 + y₃ = 25 → 20 + 3 + y₃ = 25 → 23 + y₃ = 25 → <b>y₃ = 2</b>.',
+    hint:'4×5=20 e 3×1=3. Soma = 23. Então y₃ = 25−23 = 2.'
+  },
+  {
+    boxes:[mkBox('y = [5, 1, 2]','fase 2 concluída ✓','done'),mkBox('Fase 3: U · x = y','sistema triangular superior','hi'),mkBox('U = [[2,1,1],[0,1,1],[0,0,2]]','triangular superior','')],
+    extra:null,res:null,
+    cap:'<b>Vetor y = [5, 1, 2]</b> encontrado. Agora a Fase 3: resolver U·x = y. Como U é triangular superior, começamos <b>de baixo para cima</b>.',
+    hint:'Triangular superior: última linha tem só uma incógnita. Por isso na substituição regressiva começamos pelo final.'
+  },
+  {
+    boxes:[mkBox('Última linha de U:','',''),mkBox('0·x₁ + 0·x₂ + 2·x₃ = 2','só x₃!','hi'),mkBox('2·x₃ = 2  →  x₃ = 2/2','','')],
+    extra:mkBox('x₃ = 1','encontrado ✓','result pop'),
+    res:null,
+    cap:'Última linha de U: 2x₃ = 2. Dividindo por 2: <b>x₃ = 1</b>. Um passo direto, sem substituição necessária.',
+    hint:'Na substituição regressiva, a última linha sempre tem apenas uma incógnita. É o ponto de partida.'
+  },
+  {
+    boxes:[mkBox('Linha 2 de U:','',''),mkBox('0·x₁ + x₂ + x₃ = 1','substituir x₃=1','hi'),mkBox('x₂ + 1 = 1  →  x₂ = 1−1','','')],
+    extra:mkBox('x₂ = 0','encontrado ✓','result pop'),
+    res:null,
+    cap:'Linha 2 de U: x₂ + x₃ = 1. Substituímos x₃ = 1: x₂ + 1 = 1 → <b>x₂ = 0</b>.',
+    hint:'x₂ = 1 − 1 = 0. O coeficiente de x₃ na linha 2 é 1, então: x₂ = y₂ − 1·x₃ = 1 − 1 = 0.'
+  },
+  {
+    boxes:[mkBox('Linha 1 de U:','',''),mkBox('2·x₁ + x₂ + x₃ = 5','substituir x₂=0, x₃=1','hi'),mkBox('2x₁ + 0 + 1 = 5  →  2x₁ = 4','','')],
+    extra:mkBox('x₁ = 2','encontrado ✓','result pop'),
+    res:null,
+    cap:'Linha 1 de U: 2x₁ + x₂ + x₃ = 5. Substituímos x₂=0 e x₃=1: 2x₁ + 0 + 1 = 5 → 2x₁ = 4 → <b>x₁ = 2</b>.',
+    hint:'2x₁ = 5 − 0 − 1 = 4. Então x₁ = 4/2 = 2.'
+  },
+  {
+    boxes:[mkBox('Verificação: A·x = b?','x = [2, 0, 1]',''),mkBox('Linha 1: 2·2 + 1·0 + 1·1 = 5','4+0+1 = 5  ✓','done'),mkBox('Linha 2: 4·2 + 3·0 + 3·1 = 11','8+0+3 = 11  ✓','done'),mkBox('Linha 3: 8·2 + 7·0 + 9·1 = 25','16+0+9 = 25  ✓','done')],
+    extra:null,res:null,
+    cap:'<b>Verificação completa:</b> A × [2,0,1]ᵀ = [5, 11, 25] ✓. As três linhas batem com b.',
+    hint:'Sempre verifique o resultado final multiplicando A pelo x encontrado. Se der b, está correto!'
+  },
+  {
+    boxes:[mkBox('x₁ = 2','','done'),mkBox('x₂ = 0','','done'),mkBox('x₃ = 1','','done')],
+    extra:null,
+    res:'x = [2, 0, 1] ✓ — SPD',
+    cap:'Solução final: <b>x = [2, 0, 1]</b>. Sistema Possível e Determinado. Percurso: LU → Ly=b → Ux=y. Três etapas, cada uma simples!',
+    hint:'A fatoração LU parece trabalhosa, mas paga o investimento quando temos muitos sistemas com a mesma matriz A e b diferentes.'
+  },
+];
+renders['sb']=sbData.map(s=>()=>{
+  const st=clearStage('st-subst');const col=document.createElement('div');col.className='syscol';
+  s.boxes.forEach(b=>{const box=document.createElement('div');box.className='sbox '+(b.c||'');box.innerHTML=b.t+(b.s?'<small>'+b.s+'</small>':'');col.appendChild(box);});
+  if(s.extra){const dv=document.createElement('div');dv.className='sdiv';col.appendChild(dv);const res=document.createElement('div');res.className='sbox '+(s.extra.c||'');res.innerHTML=s.extra.t+(s.extra.s?'<small>'+s.extra.s+'</small>':'');col.appendChild(res);}
+  st.appendChild(col);
+  if(s.res){const rb=document.createElement('div');rb.className='rbadge pop';rb.style.marginTop='8px';rb.textContent=s.res;st.appendChild(rb);}
+  setCap('sb',s.cap,s.hint);
+});
+renders['sb'][0]();updateUI('sb');
+
+/* ============================================================
+   07 — AUTOVALORES  (8 passos)
+============================================================ */
+const eigB=[[5,0,0],[1,2,0],[3,4,7]];
+steps['e']=0;
+renders['e']=[
+  // 1 — apresentação
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{},'B');st.appendChild(wB);
+    const cs=calcStack([
+      {t:'B é triangular inferior',cls:''},
+      {t:'zeros acima da diagonal',cls:''},
+      {t:'autovalores = diagonal',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('e','Matriz B triangular inferior 3×3. Para qualquer matriz triangular, os autovalores são <b>exatamente os elementos da diagonal principal</b>.','Por que? O polinômio característico det(B−λI) = 0 de uma triangular sempre fatora como (d₁−λ)(d₂−λ)(d₃−λ) = 0.');
+  },
+  // 2 — o que é autovalor
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{},'B');st.appendChild(wB);
+    const cs=calcStack([
+      {t:'B·v = λ·v',cls:'active'},
+      {t:'v = autovetor',cls:''},
+      {t:'λ = autovalor',cls:''},
+      {t:'λ é um escalar',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('e','Definição: λ é autovalor de B se existe vetor v ≠ 0 tal que <b>B·v = λ·v</b>. A matriz só "estica" o vetor, não muda sua direção.','Equivalente: det(B − λI) = 0. Para triangulares, esse determinante se calcula facilmente.');
+  },
+  // 3 — polinômio característico
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'diag','1,1':'diag','2,2':'diag'},'B');st.appendChild(wB);
+    const cs=calcStack([
+      {t:'det(B − λI) = 0',cls:''},
+      {t:'(5−λ)(2−λ)(7−λ) = 0',cls:'active'},
+      {t:'→ 3 soluções:',cls:''},
+    ]);
+    st.appendChild(cs);
+    setCap('e','Para B triangular, det(B−λI) fatoriza direto: <b>(5−λ)(2−λ)(7−λ) = 0</b>. Cada fator corresponde a um elemento da diagonal.','Cada fator (dᵢ − λ) = 0 dá λ = dᵢ. Por isso a diagonal é suficiente para triangulares.');
+  },
+  // 4 — λ₁
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'diag'},'B');st.appendChild(wB);
+    const fp=document.createElement('div');fp.className='fpanel';
+    const f=document.createElement('div');f.className='fline big pop';f.textContent='λ₁ = 5';fp.appendChild(f);
+    const f2=document.createElement('div');f2.className='fline muted';f2.textContent='B[1,1] = 5';fp.appendChild(f2);
+    const f3=document.createElement('div');f3.className='fline';f3.style.fontSize='13px';f3.style.marginTop='8px';f3.textContent='(5 − λ) = 0 → λ = 5';fp.appendChild(f3);
+    st.appendChild(fp);
+    setCap('e','Fator (5−λ) = 0 → <b>λ₁ = 5</b>. Elemento B[1,1] = 5 é o primeiro autovalor.','O índice da posição na diagonal determina o índice do autovalor: [1,1] → λ₁.');
+  },
+  // 5 — λ₂
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'done','1,1':'diag'},'B');st.appendChild(wB);
+    const fp=document.createElement('div');fp.className='fpanel';
+    [{t:'λ₁ = 5',c:'muted'},{t:'λ₂ = 2',c:'big pop'},{t:'B[2,2] = 2',c:'muted'}].forEach(f=>{const d=document.createElement('div');d.className='fline '+f.c;d.textContent=f.t;fp.appendChild(d);});
+    const f3=document.createElement('div');f3.className='fline';f3.style.fontSize='13px';f3.style.marginTop='8px';f3.textContent='(2 − λ) = 0 → λ = 2';fp.appendChild(f3);
+    st.appendChild(fp);
+    setCap('e','Fator (2−λ) = 0 → <b>λ₂ = 2</b>. Elemento B[2,2] = 2 é o segundo autovalor.','');
+  },
+  // 6 — λ₃
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'done','1,1':'done','2,2':'diag'},'B');st.appendChild(wB);
+    const fp=document.createElement('div');fp.className='fpanel';
+    [{t:'λ₁ = 5',c:'muted'},{t:'λ₂ = 2',c:'muted'},{t:'λ₃ = 7',c:'big pop'},{t:'B[3,3] = 7',c:'muted'}].forEach(f=>{const d=document.createElement('div');d.className='fline '+f.c;d.textContent=f.t;fp.appendChild(d);});
+    const f3=document.createElement('div');f3.className='fline';f3.style.fontSize='13px';f3.style.marginTop='8px';f3.textContent='(7 − λ) = 0 → λ = 7';fp.appendChild(f3);
+    st.appendChild(fp);
+    setCap('e','Fator (7−λ) = 0 → <b>λ₃ = 7</b>. Elemento B[3,3] = 7 é o terceiro autovalor.','');
+  },
+  // 7 — propriedades
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'diag','1,1':'diag','2,2':'diag'},'B');st.appendChild(wB);
+    const cs=calcStack([
+      {t:'trace(B) = 5+2+7 = 14',cls:''},
+      {t:'Σλ = 5+2+7 = 14  ✓',cls:'active'},
+      {t:'det(B) = 5×2×7 = 70',cls:''},
+      {t:'Πλ = 5×2×7 = 70  ✓',cls:'active'},
+    ]);
+    st.appendChild(cs);
+    setCap('e','Verificação: a soma dos autovalores = traço(B) = 14 ✓. O produto dos autovalores = det(B) = 70 ✓. Essas propriedades valem para qualquer matriz.','Traço = soma da diagonal = soma dos autovalores. Determinante = produto dos autovalores. Dois atalhos poderosos!');
+  },
+  // 8 — resumo
+  ()=>{
+    const st=clearStage('st-eig');
+    const wB=buildMat(eigB,{'0,0':'diag','1,1':'diag','2,2':'diag'},'B');st.appendChild(wB);
+    const fp=document.createElement('div');fp.className='fpanel';
+    [{t:'λ₁ = 5',c:'med'},{t:'λ₂ = 2',c:'med'},{t:'λ₃ = 7',c:'med'}].forEach(f=>{const d=document.createElement('div');d.className='fline '+f.c;d.textContent=f.t;fp.appendChild(d);});
+    const dv=document.createElement('div');dv.className='fdiv';fp.appendChild(dv);
+    const rb=document.createElement('div');rb.className='rbadge pop';rb.textContent='λ = { 5, 2, 7 }';fp.appendChild(rb);
+    st.appendChild(fp);
+    setCap('e','Os três autovalores de B são <b>λ₁=5, λ₂=2, λ₃=7</b>. Para qualquer matriz triangular (superior ou inferior), leia diretamente a diagonal.','Isso vale porque a eliminação gaussiana não muda os autovalores das matrizes triangulares.');
+  },
+];
+renders['e'][0]();updateUI('e');
+
+document.getElementById('pg-transp').style.display='block';
+</script>
+</body>
+</html>
+HTMLEOF
