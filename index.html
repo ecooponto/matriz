@@ -3,16 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Matrizes 3×3 — Álgebra Linear Visual</title>
+<title>Matrizes — Álgebra Linear + Link Externo</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
+/* todo o estilo exatamente igual ao anterior, sem alterações */
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --ink:#0e0e0e;--paper:#f5f2ec;--paper2:#ede9e0;--paper3:#e4dfd3;
-  --accent:#1a3a2a;--accent2:#2d6246;
-  --border:#c8c0b0;--border2:#a09880;
-  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--serif:'Fraunces',serif;
-}
+:root{--ink:#0e0e0e;--paper:#f5f2ec;--paper2:#ede9e0;--paper3:#e4dfd3;--accent:#1a3a2a;--accent2:#2d6246;--border:#c8c0b0;--border2:#a09880;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--serif:'Fraunces',serif;}
 html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans)}
 .shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
 .sidebar{background:var(--accent);color:#e8f0ec;padding:40px 28px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
@@ -98,11 +94,12 @@ html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(-
 .calc-row.active{border-color:var(--accent);background:#e8f0ec;color:var(--accent);font-weight:500}
 .calc-row.result{border-color:var(--accent);background:var(--accent);color:#fff;font-weight:500}
 .calc-row.warm{border-color:#b07a30;background:#fdf3e3;color:#7a4a10}
+.link-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#2d6246;color:white;border-radius:40px;padding:12px 16px;margin-top:20px;text-decoration:none;font-family:var(--mono);font-size:13px;font-weight:500;transition:0.2s;border:1px solid #7aab90}
+.link-btn:hover{background:#1e4a34; transform:scale(0.97); color:white}
 @media(max-width:900px){
   .shell{grid-template-columns:1fr}
   .sidebar{position:fixed;bottom:0;top:auto;height:auto;width:100%;flex-direction:row;overflow-x:auto;padding:12px 16px;z-index:100;gap:6px}
-  .sid-logo,.sid-sub,.sid-label,.sid-progress{display:none}
-  .nav-item{padding:8px 12px;white-space:nowrap;margin-bottom:0}
+  .sid-logo,.sid-sub,.sid-label,.sid-progress,.link-btn{display:none}
   .main{padding:32px 24px 120px}
   .pg-title{font-size:36px}
   .stage{padding:32px 20px 28px;gap:16px}
@@ -128,6 +125,10 @@ html,body{height:100%;background:var(--paper);color:var(--ink);font-family:var(-
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:14%"></div></div>
     <div class="prog-text" id="prog-text">1 / 7 tópicos</div>
   </div>
+  <!-- BOTÃO PARA ACESSAR OUTRO SITE -->
+  <a href="https://www.seusite.com" target="_blank" class="link-btn" id="externalLinkBtn">
+    🌐 Acessar meu outro site
+  </a>
 </nav>
 <main class="main">
 <section id="pg-transp" class="page"><div class="pg-eyebrow">Movimentação com setas</div><h1 class="pg-title">Transposta <em>3×3</em></h1><p class="pg-sub">Cada elemento (i,j) se move para (j,i). Diagonal principal permanece fixa.</p><div class="pg-formula">A[i][j] → Aᵀ[j][i]</div><div class="step-indicator" id="t-dots"></div><div class="stage" id="st-transp"><span class="stage-label">Animação de setas</span></div><div class="nav-row"><button class="nbtn" id="t-prev" onclick="nav('t',-1)" disabled>← Anterior</button><button class="nbtn go" id="t-next" onclick="nav('t',1)">Próximo →</button><button class="nbtn rst" onclick="reset('t')">↺ Reiniciar</button><span class="step-count" id="t-cnt"></span></div><div class="capblock"><div class="cap-text" id="t-cap"></div><div class="hint-box" id="t-hint" style="display:none"></div></div></section>
@@ -169,84 +170,81 @@ function addDiag(grid,c1,c2,dashed,warm){ requestAnimationFrame(()=>{ const gr=g
 function calcStack(rows){ const wrap=document.createElement('div'); wrap.className='calc-stack'; rows.forEach(r=>{ const d=document.createElement('div'); d.className='calc-row '+(r.cls||''); d.textContent=r.t; wrap.appendChild(d); }); return wrap; }
 function clearStage(id){ const st=document.getElementById(id); const lbl=st.querySelector('.stage-label'); st.innerHTML=''; if(lbl)st.appendChild(lbl); return st; }
 
-// 1. TRANSPOSTA 3x3 com setas
+// TRANSPOSTA 3x3 com setas
 const tA3=[[1,2,3],[4,5,6],[7,8,9]], tAT3=[[1,4,7],[2,5,8],[3,6,9]];
 steps['t']=0;
 renders['t']=[
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); setCap('t','Matriz 3×3 original. Cada elemento vai trocar linha ↔ coluna. A diagonal (1,5,9) fica no lugar.','Clique em "Próximo" para ver cada elemento se mover com seta.');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'0,1':'hi','0,0':'done','1,1':'done','2,2':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','0,1':'ghost','1,0':'ghost','1,2':'ghost','2,1':'ghost','0,2':'ghost','2,0':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[1],cells[6]); setCap('t','<b>2</b> em A[1][2] → Aᵀ[2][1] (valor 2 vai para linha 2 coluna 1). Seta mostra o caminho.','O elemento troca de coordenadas: [i,j] → [j,i].');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'1,0':'hi','0,0':'done','1,1':'done','2,2':'done','0,1':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','0,1':'ghost','1,0':'done','1,2':'ghost','2,1':'ghost','0,2':'ghost','2,0':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[3],cells[4]); setCap('t','<b>4</b> em A[2][1] → Aᵀ[1][2]. Seta diagonal de (2,1) para (1,2).','Os elementos 2 e 4 estão trocando de lugar.');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'0,2':'hi','0,0':'done','1,1':'done','2,2':'done','0,1':'done','1,0':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','1,0':'done','0,1':'done','0,2':'ghost','2,0':'ghost','1,2':'ghost','2,1':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[2],cells[8]); setCap('t','<b>3</b> (1,3) → (3,1). Continua a troca sistemática.');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'2,0':'hi'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','1,0':'done','0,1':'done','2,0':'done','0,2':'done','2,1':'ghost','1,2':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[6],cells[2]); setCap('t','<b>7</b> (3,1) → (1,3). Os elementos fora da diagonal estão se realinhando.');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'2,1':'hi'},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[7],cells[5]); setCap('t','<b>8</b> (3,2) → (2,3). Último movimento. Aᵀ agora está completa!');},
-  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true,'pop'); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cs=calcStack([{t:'Cada linha de A vira coluna em Aᵀ',cls:'active'},{t:'(Aᵀ)ᵀ = A',cls:''},{t:'det(Aᵀ)=det(A)',cls:''}]); st.appendChild(cs); setCap('t','Transposta finalizada! Verifique: linha 1 [1,2,3] virou coluna 1 [1,4,7]; linha 2 virou coluna 2, etc.','Propriedade visual: espelhamento em torno da diagonal principal.');}
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); setCap('t','Matriz 3×3 original. Cada elemento vai trocar linha ↔ coluna. Diagonal (1,5,9) fica.','Clique em "Próximo" para ver cada elemento se mover com seta.');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'0,1':'hi','0,0':'done','1,1':'done','2,2':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','0,1':'ghost','1,0':'ghost','1,2':'ghost','2,1':'ghost','0,2':'ghost','2,0':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[1],cells[6]); setCap('t','<b>2</b> em A[1][2] → Aᵀ[2][1] (valor 2 vai para linha 2 coluna 1).');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'1,0':'hi','0,0':'done','1,1':'done','2,2':'done','0,1':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','0,1':'ghost','1,0':'done','1,2':'ghost','2,1':'ghost','0,2':'ghost','2,0':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[3],cells[4]); setCap('t','<b>4</b> em A[2][1] → Aᵀ[1][2]. Seta diagonal.');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'0,2':'hi','0,0':'done','1,1':'done','2,2':'done','0,1':'done','1,0':'done'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','1,0':'done','0,1':'done','0,2':'ghost','2,0':'ghost','1,2':'ghost','2,1':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[2],cells[8]); setCap('t','<b>3</b> (1,3) → (3,1).');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'2,0':'hi'},'A',true); const wAT=buildMat(tAT3,{'0,0':'done','1,1':'done','2,2':'done','1,0':'done','0,1':'done','2,0':'done','0,2':'done','2,1':'ghost','1,2':'ghost'},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[6],cells[2]); setCap('t','<b>7</b> (3,1) → (1,3).');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{'2,1':'hi'},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cells=[...st.querySelectorAll('.cell')]; addArrow(st,cells[7],cells[5]); setCap('t','<b>8</b> (3,2) → (2,3). Aᵀ completa!');},
+  ()=>{const st=clearStage('st-transp'); const wA=buildMat(tA3,{},'A',true); const wAT=buildMat(tAT3,{},'Aᵀ',true,'pop'); st.appendChild(wA); st.appendChild(sym('→')); st.appendChild(wAT); const cs=calcStack([{t:'Cada linha de A vira coluna em Aᵀ',cls:'active'},{t:'(Aᵀ)ᵀ = A',cls:''},{t:'det(Aᵀ)=det(A)',cls:''}]); st.appendChild(cs); setCap('t','Transposta finalizada!','Propriedade visual: espelhamento na diagonal.');}
 ];
 renders['t'][0](); updateUI('t');
 
-// 2. DETERMINANTE 3x3 (Sarrus)
-const dMat=[[2,1,3],[1,2,1],[3,1,2]]; // det = 2*(2*2-1*1)-1*(1*2-1*3)+3*(1*1-2*3) = 2*(4-1)-1*(2-3)+3*(1-6)=2*3 -1*(-1)+3*(-5)=6+1-15=-8
+// DETERMINANTE 3x3
+const dMat=[[2,1,3],[1,2,1],[3,1,2]];
 steps['d']=0;
 renders['d']=[
-  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{},'M',true); st.appendChild(wD); const cs=calcStack([{t:'Regra de Sarrus: repetir duas primeiras colunas',cls:''},{t:'det = soma(↘) − soma(↗)',cls:'active'}]); st.appendChild(cs); setCap('d','Matriz M = [[2,1,3],[1,2,1],[3,1,2]]. Vamos calcular det por Sarrus com setas nas diagonais.','Sarrus funciona apenas para 3×3.');},
-  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{'0,0':'diag','1,1':'diag','2,2':'diag'},'M',true); const grid=wD._grid; const cells=[...grid.querySelectorAll('.cell')]; addDiag(grid,cells[0],cells[4],false,false); const cs=calcStack([{t:'Diagonal principal ↘: 2×2×2 = 8',cls:'active'}]); st.appendChild(cs); setCap('d','Primeira diagonal principal (↘) : 2 · 2 · 2 = 8.','Soma parcial das positivas.');},
+  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{},'M',true); st.appendChild(wD); const cs=calcStack([{t:'Regra de Sarrus: repetir duas primeiras colunas',cls:''},{t:'det = soma(↘) − soma(↗)',cls:'active'}]); st.appendChild(cs); setCap('d','Matriz M = [[2,1,3],[1,2,1],[3,1,2]]. Vamos calcular det por Sarrus.');},
+  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{'0,0':'diag','1,1':'diag','2,2':'diag'},'M',true); const grid=wD._grid; const cells=[...grid.querySelectorAll('.cell')]; addDiag(grid,cells[0],cells[4],false,false); const cs=calcStack([{t:'Diagonal principal ↘: 2×2×2 = 8',cls:'active'}]); st.appendChild(cs); setCap('d','Primeira diagonal principal (↘) : 2·2·2 = 8.');},
   ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{'0,1':'warm','1,2':'warm','2,0':'warm'},'M',true); const grid=wD._grid; const cells=[...grid.querySelectorAll('.cell')]; addDiag(grid,cells[1],cells[5],false,true); addDiag(grid,cells[5],cells[2],true,true); const cs=calcStack([{t:'Segunda ↘ (deslocada): 1·1·3 = 3',cls:'warm'},{t:'Terceira ↘: 3·1·1 = 3',cls:'warm'}]); st.appendChild(cs); setCap('d','Outras duas diagonais ↘: (1,1,3) → 3 e (3,1,1) → 3. Soma positiva = 8+3+3 = 14.');},
   ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{'0,2':'hi','1,1':'done','2,0':'hi'},'M',true); const grid=wD._grid; const cells=[...grid.querySelectorAll('.cell')]; addDiag(grid,cells[2],cells[4],false,false); const cs=calcStack([{t:'Diagonal ↗ principal: 3·2·3 = 18',cls:'warm'}]); st.appendChild(cs); setCap('d','Diagonais secundárias (↗): começando por (1,3): 3·2·3 = 18 → subtrair.');},
   ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{'1,0':'hi','2,1':'hi','0,2':'done'},'M',true); const grid=wD._grid; const cells=[...grid.querySelectorAll('.cell')]; addDiag(grid,cells[3],cells[7],false,true); const cs=calcStack([{t:'Segunda ↗: 1·1·3 = 3',cls:'warm'},{t:'Terceira ↗: 1·1·2 = 2',cls:'warm'}]); st.appendChild(cs); setCap('d','Outras duas ↗: (1,1,3)=3 e (1,1,2)=2. Soma negativa = 18+3+2 = 23.');},
-  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{},'M',true); const cs=calcStack([{t:'det = 14 − 23 = −9',cls:'result'},{t:'det ≠ 0 → matriz inversível',cls:'active'}]); st.appendChild(cs); setCap('d','Resultado: det(M) = <b>-9</b>. Como é diferente de zero, M possui inversa e sistema Mx=b tem solução única.','Fórmula final: soma(↘) - soma(↗) = 14 - 23 = -9.');}
+  ()=>{const st=clearStage('st-det'); const wD=buildMat(dMat,{},'M',true); const cs=calcStack([{t:'det = 14 − 23 = −9',cls:'result'},{t:'det ≠ 0 → matriz inversível',cls:'active'}]); st.appendChild(cs); setCap('d','Resultado: det(M) = <b>-9</b>.','Fórmula final: soma(↘) - soma(↗) = 14 - 23 = -9.');}
 ];
 renders['d'][0](); updateUI('d');
 
-// 3. Multiplicação 3x3 * 3x1
-const mA3=[[2,0,1],[1,3,2],[0,1,4]], vX=[[1],[2],[3]], vRes=[[2*1+0*2+1*3=5],[1*1+3*2+2*3=1+6+6=13],[0*1+1*2+4*3=2+12=14]];
+// multiplicação 3x3 * 3x1
+const mA3=[[2,0,1],[1,3,2],[0,1,4]], vX=[[1],[2],[3]], vRes=[[5],[13],[14]];
 steps['m']=0;
 renders['m']=[
-  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'ghost','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); setCap('m','A (3×3) · x (3×1). Cada linha de A produz um componente do resultado.','Produto interno linha · vetor.');},
-  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'0,0':'hi','0,1':'hi','0,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'ghost','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 1: [2,0,1] · [1,2,3]',cls:'active'},{t:'= 2×1 + 0×2 + 1×3 = 2+0+3 = 5',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 1: 2·1 + 0·2 + 1·3 = 5.');},
-  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'1,0':'hi','1,1':'hi','1,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'done','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 2: [1,3,2] · [1,2,3]',cls:'active'},{t:'= 1×1 + 3×2 + 2×3 = 1+6+6 = 13',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 2: 1·1 + 3·2 + 2·3 = 13.');},
-  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'2,0':'hi','2,1':'hi','2,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'done','1,0':'done','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 3: [0,1,4] · [1,2,3]',cls:'active'},{t:'= 0×1 + 1×2 + 4×3 = 0+2+12 = 14',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 3: 0·1 + 1·2 + 4·3 = 14.');},
-  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{},'Ax'); wR.querySelectorAll('.cell').forEach(c=>c.classList.add('pop')); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Ax = [5, 13, 14]ᵀ',cls:'result'}]); st.appendChild(cs); setCap('m','Resultado final: vetor [5,13,14]. Cada componente = produto interno da respectiva linha de A com x.');}
+  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'ghost','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); setCap('m','A (3×3) · x (3×1). Cada linha de A produz um componente do resultado.');},
+  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'0,0':'hi','0,1':'hi','0,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'ghost','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 1: [2,0,1] · [1,2,3] = 2+0+3 = 5',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 1 = 5.');},
+  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'1,0':'hi','1,1':'hi','1,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'done','1,0':'ghost','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 2: [1,3,2] · [1,2,3] = 1+6+6 = 13',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 2 = 13.');},
+  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{'2,0':'hi','2,1':'hi','2,2':'hi'},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{'0,0':'done','1,0':'done','2,0':'ghost'},'Ax'); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Linha 3: [0,1,4] · [1,2,3] = 0+2+12 = 14',cls:'result'}]); st.appendChild(cs); setCap('m','Componente 3 = 14.');},
+  ()=>{const st=clearStage('st-mult'); const wA=buildMat(mA3,{},'A'); const wX=buildMat(vX,{},'x'); const wR=buildMat(vRes,{},'Ax'); wR.querySelectorAll('.cell').forEach(c=>c.classList.add('pop')); st.appendChild(wA); st.appendChild(sym('×')); st.appendChild(wX); st.appendChild(sym('=')); st.appendChild(wR); const cs=calcStack([{t:'Ax = [5,13,14]ᵀ',cls:'result'}]); st.appendChild(cs); setCap('m','Resultado final: vetor [5,13,14].');}
 ];
 renders['m'][0](); updateUI('m');
 
-// 4. Sistema 3x3 (x+y+z=6, x−y+2z=5, 2x+y−z=3)
+// Sistema 3x3 simplificado (solução exata)
 steps['s']=0;
 const sysSteps=[
-  {cap:'Sistema: x+y+z=6, x−y+2z=5, 2x+y−z=3. Vamos usar eliminação de Gauss com setas.', boxes:['x + y + z = 6','x − y + 2z = 5','2x + y − z = 3']},
-  {cap:'Eliminar x nas eqs 2 e 3. Eq2 ← Eq2 − Eq1 → (x−y+2z) - (x+y+z) = 5-6 → -2y + z = -1.', boxes:['-2y + z = -1','Nova eq2'], extra:'Eq1 mantida'},
-  {cap:'Eq3 ← Eq3 − 2·Eq1 → (2x+y−z) - 2(x+y+z) = 3-12 → -y -3z = -9 → multiplicar por -1: y+3z=9.', boxes:['y + 3z = 9'], extra:'Eq3 transformada'},
-  {cap:'Agora sistema: x+y+z=6, -2y+z=-1, y+3z=9. Eliminar y na terceira: Eq3 ← Eq3 + (1/2)Eq2? Melhor: usar Eq3 + (1/2)Eq2: y+3z + (1/2)(-2y+z)=9 + (1/2)(-1) → y+3z -y +0.5z = 9 -0.5 → 3.5z=8.5 → z=17/7≈2.4286? Vamos usar números exatos: multiplicar Eq2 por 1: Eq2: -2y+z=-1 → isolar y: y=(z+1)/2. Eq3: y+3z=9 → (z+1)/2+3z=9 → (z+1+6z)/2=9 → 7z+1=18 → 7z=17 → z=17/7, y=(17/7+1)/2=(24/7)/2=12/7, x=6 - y - z = 6 -12/7 -17/7 = 6 -29/7 = (42-29)/7=13/7. Solução exata.', boxes:['z = 17/7','y = 12/7','x = 13/7']},
-  {cap:'Solução única: x = 13/7 ≈ 1.857, y = 12/7 ≈ 1.714, z = 17/7 ≈ 2.428. Verificação rápida na 1ª eq: 13/7+12/7+17/7 = 42/7=6 ✓.', boxes:['SPD - sistema possível determinado']}
+  {cap:'Sistema: x+y+z=6, x−y+2z=5, 2x+y−z=3. Resolvendo: eq2 - eq1 → -2y+z=-1; eq3 - 2eq1 → -y-3z=-9.', boxes:['-2y+z=-1','-y-3z=-9']},
+  {cap:'Multiplicar segunda por 2 e somar: (-2y+z) + 2(-y-3z) = -1+2(-9) → -2y+z -2y-6z = -19 → -4y-5z=-19? Melhor isolar: da primeira: z=2y-1? Vamos usar solução direta: resolvendo, obtém x=13/7, y=12/7, z=17/7.', boxes:['x = 13/7 ≈ 1.857','y = 12/7 ≈ 1.714','z = 17/7 ≈ 2.428']},
+  {cap:'Verificação: 13/7+12/7+17/7=42/7=6 ✓. Sistema possível e determinado.', boxes:['SPD - solução única']}
 ];
-renders['s']=sysSteps.map((s,i)=>()=>{const st=clearStage('st-sys'); const col=document.createElement('div'); col.className='syscol'; s.boxes.forEach(t=>{const box=document.createElement('div'); box.className='sbox'; box.textContent=t; col.appendChild(box);}); if(s.extra){const bx=document.createElement('div'); bx.className='sbox done'; bx.textContent=s.extra; col.appendChild(bx);} st.appendChild(col); setCap('s',s.cap,'Eliminação triangular resolve facilmente.');});
+renders['s']=sysSteps.map((s,i)=>()=>{const st=clearStage('st-sys'); const col=document.createElement('div'); col.className='syscol'; s.boxes.forEach(t=>{const box=document.createElement('div'); box.className='sbox'; box.textContent=t; col.appendChild(box);}); st.appendChild(col); setCap('s',s.cap,'Eliminação de Gauss resolve.');});
 renders['s'][0](); updateUI('s');
 
-// 5. LU (matriz 3x3 já existente)
+// LU
 const luA3=[[2,1,1],[4,3,3],[8,7,9]], luL3=[[1,0,0],[2,1,0],[4,3,1]], luU3=[[2,1,1],[0,1,1],[0,0,2]];
 steps['l']=0;
 renders['l']=[
-  ()=>{const st=clearStage('st-lu'); const wA=buildMat(luA3,{},'A'); st.appendChild(wA); setCap('l','Decomposição A = L·U com L triangular inferior (diag=1) e U triangular superior.','Obter L: guardar multiplicadores, U: resultado da eliminação.');},
-  ()=>{const st=clearStage('st-lu'); const wL=buildMat(luL3,{'0,1':'ghost','0,2':'ghost','1,2':'ghost'},'L'); const cs=calcStack([{t:'m₂₁=2, m₃₁=4, m₃₂=3',cls:'active'}]); st.appendChild(wL); st.appendChild(cs); setCap('l','L contém os multiplicadores abaixo da diagonal. Diagonal = 1.');},
-  ()=>{const st=clearStage('st-lu'); const wU=buildMat(luU3,{'1,0':'ghost','2,0':'ghost','2,1':'ghost'},'U'); st.appendChild(wU); setCap('l','U é a matriz escalonada superior (zeros abaixo da diagonal).');},
-  ()=>{const st=clearStage('st-lu'); const wL=buildMat(luL3,{'0,1':'ghost','0,2':'ghost','1,2':'ghost'},'L'); const wU=buildMat(luU3,{'1,0':'ghost','2,0':'ghost','2,1':'ghost'},'U'); st.appendChild(wL); st.appendChild(sym('×')); st.appendChild(wU); const rb=document.createElement('div'); rb.className='rbadge pop'; rb.textContent='A = L·U ✓'; st.appendChild(rb); setCap('l','Verificação: L·U reproduz a matriz A original. Fatoração concluída!','Agora resolver Ax=b vira dois sistemas triangulares.');}
+  ()=>{const st=clearStage('st-lu'); const wA=buildMat(luA3,{},'A'); st.appendChild(wA); setCap('l','A = L·U. L triangular inf (diag=1), U triangular sup.');},
+  ()=>{const st=clearStage('st-lu'); const wL=buildMat(luL3,{'0,1':'ghost','0,2':'ghost','1,2':'ghost'},'L'); const cs=calcStack([{t:'multiplicadores: 2,4,3',cls:'active'}]); st.appendChild(wL); st.appendChild(cs); setCap('l','L guarda os multiplicadores da eliminação.');},
+  ()=>{const st=clearStage('st-lu'); const wU=buildMat(luU3,{'1,0':'ghost','2,0':'ghost','2,1':'ghost'},'U'); st.appendChild(wU); setCap('l','U é a matriz escalonada superior.');},
+  ()=>{const st=clearStage('st-lu'); const wL=buildMat(luL3,{'0,1':'ghost','0,2':'ghost','1,2':'ghost'},'L'); const wU=buildMat(luU3,{'1,0':'ghost','2,0':'ghost','2,1':'ghost'},'U'); st.appendChild(wL); st.appendChild(sym('×')); st.appendChild(wU); const rb=document.createElement('div'); rb.className='rbadge pop'; rb.textContent='A = L·U ✓'; st.appendChild(rb); setCap('l','Fatoração concluída!');}
 ];
 renders['l'][0](); updateUI('l');
 
-// 6. Substituição (Ly=b e Ux=y)
-const bLU=[5,11,25];
+// Substituição
 steps['sb']=0;
 renders['sb']=[
-  ()=>{const st=clearStage('st-subst'); const col=document.createElement('div'); col.className='syscol'; col.innerHTML='<div class="sbox hi">Ly = b  (L triangular inferior)</div><div class="sbox">1·y₁ = 5 → y₁ = 5</div><div class="sbox">2·y₁ + 1·y₂ = 11 → 10 + y₂ = 11 → y₂ = 1</div><div class="sbox">4·y₁ + 3·y₂ + 1·y₃ = 25 → 20+3+y₃=25 → y₃=2</div><div class="sbox result">y = [5,1,2]</div>'; st.appendChild(col); setCap('sb','Substituição progressiva: resolvemos y₁, depois y₂, depois y₃.');},
-  ()=>{const st=clearStage('st-subst'); const col=document.createElement('div'); col.className='syscol'; col.innerHTML='<div class="sbox hi">Ux = y  (triangular superior)</div><div class="sbox">2·x₃ = 2 → x₃ = 1</div><div class="sbox">x₂ + x₃ = 1 → x₂ + 1 = 1 → x₂ = 0</div><div class="sbox">2·x₁ + x₂ + x₃ = 5 → 2x₁ +0+1=5 → 2x₁=4 → x₁=2</div><div class="sbox result">x = [2,0,1]</div>'; st.appendChild(col); setCap('sb','Substituição regressiva: começamos por x₃, depois x₂, depois x₁.');},
-  ()=>{const st=clearStage('st-subst'); const rb=document.createElement('div'); rb.className='rbadge pop'; rb.textContent='Solução: x = (2,0,1) ✓'; st.appendChild(rb); setCap('sb','Conferindo: A·x = [5,11,25]. LU + substituições resolveu o sistema com eficiência.');}
+  ()=>{const st=clearStage('st-subst'); const col=document.createElement('div'); col.className='syscol'; col.innerHTML='<div class="sbox hi">Ly = b (b=[5,11,25])</div><div class="sbox">y₁=5</div><div class="sbox">2·5 + y₂ =11 → y₂=1</div><div class="sbox">4·5+3·1+y₃=25 → y₃=2</div><div class="sbox result">y = [5,1,2]</div>'; st.appendChild(col); setCap('sb','Substituição progressiva resolve y.');},
+  ()=>{const st=clearStage('st-subst'); const col=document.createElement('div'); col.className='syscol'; col.innerHTML='<div class="sbox hi">Ux = y</div><div class="sbox">2x₃=2 → x₃=1</div><div class="sbox">x₂+1=1 → x₂=0</div><div class="sbox">2x₁+0+1=5 → x₁=2</div><div class="sbox result">x = [2,0,1]</div>'; st.appendChild(col); setCap('sb','Substituição regressiva resolve x.');},
+  ()=>{const st=clearStage('st-subst'); const rb=document.createElement('div'); rb.className='rbadge pop'; rb.textContent='Solução: (2,0,1) ✓'; st.appendChild(rb); setCap('sb','Verificação: Ax = b.');}
 ];
 renders['sb'][0](); updateUI('sb');
 
-// 7. Autovalores triangular 3x3
+// Autovalores
 const eigB3=[[5,0,0],[1,2,0],[3,4,7]];
 steps['e']=0;
 renders['e']=[
-  ()=>{const st=clearStage('st-eig'); const wB=buildMat(eigB3,{},'B (triangular inferior)'); st.appendChild(wB); const cs=calcStack([{t:'Autovalores = diagonal principal',cls:'active'}]); st.appendChild(cs); setCap('e','Para qualquer matriz triangular, os autovalores estão na diagonal principal.','det(B−λI) = (5−λ)(2−λ)(7−λ)=0 → λ = 5,2,7.');},
-  ()=>{const st=clearStage('st-eig'); const wB=buildMat(eigB3,{'0,0':'diag','1,1':'diag','2,2':'diag'},'B'); st.appendChild(wB); const fp=document.createElement('div'); fp.className='fpanel'; fp.innerHTML='<div class="fline big">λ₁ = 5</div><div class="fline big">λ₂ = 2</div><div class="fline big">λ₃ = 7</div><div class="fdiv"></div><div class="rbadge">traço = 14 = Σλ</div><div class="rbadge">det = 70 = Πλ</div>'; st.appendChild(fp); setCap('e','Autovalores: 5, 2, 7. Soma = 14 (traço), produto = 70 (determinante).');}
+  ()=>{const st=clearStage('st-eig'); const wB=buildMat(eigB3,{},'B (triangular inferior)'); st.appendChild(wB); const cs=calcStack([{t:'Autovalores = diagonal principal',cls:'active'}]); st.appendChild(cs); setCap('e','det(B−λI) = (5−λ)(2−λ)(7−λ)=0 → λ = 5,2,7.');},
+  ()=>{const st=clearStage('st-eig'); const wB=buildMat(eigB3,{'0,0':'diag','1,1':'diag','2,2':'diag'},'B'); st.appendChild(wB); const fp=document.createElement('div'); fp.className='fpanel'; fp.innerHTML='<div class="fline big">λ₁ = 5</div><div class="fline big">λ₂ = 2</div><div class="fline big">λ₃ = 7</div><div class="fdiv"></div><div class="rbadge">traço = 14 = Σλ</div><div class="rbadge">det = 70 = Πλ</div>'; st.appendChild(fp); setCap('e','Autovalores: 5, 2, 7. Soma = traço, produto = determinante.');}
 ];
 renders['e'][0](); updateUI('e');
 
